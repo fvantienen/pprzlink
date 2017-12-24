@@ -3025,5 +3025,14 @@
 
   <msg_class name="usbrf" id="6">
 
+    <message name="REQ_INFO" id="1">
+      <field name="version" type="uint32">ground module version</field>
+    </message>
+
+    <message name="INFO" id="2">
+      <field name="id" type="uint32">hardware id of the device</field>
+      <field name="version" type="uint32">software version of the device</field>
+    </message>
+    
   </msg_class>  
 </protocol>
