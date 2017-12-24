@@ -40,6 +40,7 @@ MESSAGES_LIB ?= $(MESSAGES_INSTALL)/share/pprzlink/src
 TELEMETRY_H ?= $(MESSAGES_INCLUDE)/messages.h
 DATALINK_H ?= $(MESSAGES_INCLUDE)/dl_protocol.h
 INTERMCU_H ?= $(MESSAGES_INCLUDE)/intermcu_msg.h
+USBRF_H ?= $(MESSAGES_INCLUDE)/usbrf_msg.h
 
 # validate xml for pygen by default
 # to skip validation define VALIDATE_XML to 0 or FALSE
@@ -73,6 +74,7 @@ pygen_messages: pre_messages_dir
 	$(Q)./tools/generator/gen_messages.py $(VALIDATE_FLAG) --protocol $(PPRZLINK_LIB_VERSION) --messages $(PPRZLINK_MSG_VERSION) --lang C -o $(TELEMETRY_H) $(MESSAGES_XML) telemetry
 	$(Q)./tools/generator/gen_messages.py $(VALIDATE_FLAG) --protocol $(PPRZLINK_LIB_VERSION) --messages $(PPRZLINK_MSG_VERSION) --lang C -o $(DATALINK_H) $(MESSAGES_XML) datalink
 	$(Q)./tools/generator/gen_messages.py $(VALIDATE_FLAG) --protocol $(PPRZLINK_LIB_VERSION) --messages $(PPRZLINK_MSG_VERSION) --lang C -o $(INTERMCU_H) $(MESSAGES_XML) intermcu
+	$(Q)./tools/generator/gen_messages.py $(VALIDATE_FLAG) --protocol $(PPRZLINK_LIB_VERSION) --messages $(PPRZLINK_MSG_VERSION) --lang C -o $(USBRF_H) $(MESSAGES_XML) usbrf
 
 pymessages: pygen_messages post_messages_install
 

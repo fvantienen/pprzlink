@@ -3022,5 +3022,8 @@
     </message>
 
   </msg_class>
-  
+
+  <msg_class name="usbrf" id="6">
+
+  </msg_class>  
 </protocol>
