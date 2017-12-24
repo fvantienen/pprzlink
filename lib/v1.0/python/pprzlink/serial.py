@@ -23,7 +23,8 @@ class SerialMessagesInterface(threading.Thread):
         self.trans = PprzTransport(msg_class)
 
     def stop(self):
-        print("End thread and close serial link")
+        if self.verbose:
+            print("End thread and close serial link")
         self.running = False
         self.ser.close()
 

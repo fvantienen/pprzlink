@@ -3030,9 +3030,10 @@
     </message>
 
     <message name="INFO" id="2">
-      <field name="id" type="uint32">hardware id of the device</field>
+      <field name="board" type="uint32">the board identifier</field>
       <field name="version" type="uint32">software version of the device</field>
+      <field name="id" type="uint32[]">hardware id of the device</field>
     </message>
-    
+
   </msg_class>  
 </protocol>

@@ -44,7 +44,7 @@ class PprzMessage(object):
                 self._fieldvalues.append([0])
             else:
                 self._fieldvalues.append(0)
-        if messages_xml_map.message_dictionary_broadcast[self._name]=='forwarded':
+        if self._name in messages_xml_map.message_dictionary_broadcast and messages_xml_map.message_dictionary_broadcast[self._name]=='forwarded':
             self.broadcasted = False
         else:
             self.broadcasted = True
@@ -251,11 +251,11 @@ class PprzMessage(object):
                 msg_offset += 1
                 array_value = []
                 for count in range(0, array_length):
-                    array_value.append(struct.unpack('<' + bin_type[0], data[msg_offset:msg_offset + bin_type[1]])[0])
+                    array_value.append(struct.unpack('<' + bin_type[0], str(data[msg_offset:msg_offset + bin_type[1]]))[0])
                     msg_offset = msg_offset + bin_type[1]
                 values.append(array_value)
             else:
-                value = struct.unpack('<' + bin_type[0], data[msg_offset:msg_offset + bin_type[1]])[0]
+                value = struct.unpack('<' + bin_type[0], bytes(data[msg_offset:msg_offset + bin_type[1]]))[0]
                 msg_offset = msg_offset + bin_type[1]
                 values.append(value)
         self.set_values(values)
