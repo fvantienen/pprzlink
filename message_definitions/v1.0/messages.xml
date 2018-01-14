@@ -3035,5 +3035,28 @@
       <field name="id" type="uint32[]">hardware id of the device</field>
     </message>
 
+    <message name="PROT_EXEC" id="3">
+      <field name="id" type="int8" values="CYRF_SCANNER|DSM_HACK|CC_SCANNER|FRSKY_HACK">the protocol ID</field>
+      <field name="type" type="uint8" values="STOP|START">the protocol action to execute</field>
+      <field name="arg_offset" type="uint16">the argument offset</field>
+      <field name="arg_size" type="uint16">total argument size</field>
+      <field name="arg_data" type="uint8[]">the argument data</field>
+    </message>
+
+    <message name="PROT_STATE" id="4">
+      <field name="id" type="int8" values="CYRF_SCANNER|DSM_HACK|CC_SCANNER|FRSKY_HACK">the current protocol ID</field>
+      <field name="state" type="uint8" values="STOPPED|RUNNING">the current protocol state</field>
+      <field name="data" type="uint8[]"> extra state data</field>
+    </message>
+
+    <message name="RECV_DATA" id="5">
+      <field name="chip_id" type="uint8" values="CYRF6936|CC2500">the chip identifier</field>
+      <field name="data" type="uint8[]">the received packet data</field>
+    </message>
+
+    <messge name="RC_DATA" id="6">
+      <field name="data" type="uint16[]">the RC channel data</field>
+    </messge>
+
   </msg_class>  
 </protocol>

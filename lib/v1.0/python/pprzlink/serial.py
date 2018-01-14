@@ -8,15 +8,17 @@ from .pprz_transport import PprzTransport
 
 
 class SerialMessagesInterface(threading.Thread):
-    def __init__(self, callback, verbose=False, device='/dev/ttyUSB0', baudrate=115200,
+    def __init__(self, callback, cb_disconnect=None, verbose=False, device='/dev/ttyUSB0', baudrate=115200,
                  msg_class='telemetry'):
         threading.Thread.__init__(self)
         self.callback = callback
+        self.cb_disconnect = cb_disconnect
         self.verbose = verbose
+        self.device = device
         self.msg_class = msg_class
         self.running = True
         try:
-            self.ser = serial.Serial(device, baudrate, timeout=1.0)
+            self.ser = serial.Serial(self.device, baudrate, timeout=1.0)
         except serial.SerialException:
             print("Error: unable to open serial port '%s'" % device)
             exit(0)
@@ -30,6 +32,10 @@ class SerialMessagesInterface(threading.Thread):
 
     def shutdown(self):
         self.stop()
+
+    def disconnect(self):
+        if self.cb_disconnect != None:
+            self.cb_disconnect()
 
     def __del__(self):
         try:
@@ -60,6 +66,8 @@ class SerialMessagesInterface(threading.Thread):
 
         except StopIteration:
             pass
+        except serial.SerialException:
+            self.disconnect()
 
 
 def test():
