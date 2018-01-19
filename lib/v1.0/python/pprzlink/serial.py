@@ -28,7 +28,10 @@ class SerialMessagesInterface(threading.Thread):
         if self.verbose:
             print("End thread and close serial link")
         self.running = False
-        self.ser.close()
+        try:
+            self.ser.close()
+        except:
+            pass
 
     def shutdown(self):
         self.stop()
@@ -36,10 +39,11 @@ class SerialMessagesInterface(threading.Thread):
     def disconnect(self):
         if self.cb_disconnect != None:
             self.cb_disconnect()
+        self.stop()
 
     def __del__(self):
         try:
-            self.ser.close()
+            self.stop()
         except:
             pass
 
