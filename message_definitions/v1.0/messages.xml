@@ -225,6 +225,8 @@
       <field name="downlink_rate" type="uint16" unit="bytes/s"/>
       <field name="uplink_rate" type="uint16" unit="msgs/s"/>
       <field name="downlink_ovrn" type="uint8"/>
+      <field name="uplink_err" type="uint8">Uplink frames rejected by the parser (bad checksum or length, includes uplink_ovrn), wraps at 256</field>
+      <field name="uplink_ovrn" type="uint8">Uplink frames dropped because the previous one was not handled yet, wraps at 256</field>
     </message>
 
 <!-- Current value of one variable from the dl_settings (airframe.xml) -->
@@ -404,7 +406,30 @@
       <field name="cycle_time" type="uint32" unit="ms"/>
     </message>
 
-    <!-- 51 is free -->
+    <message name="LINK_ROUTER_REPORT" id="51">
+      <description>
+        Statistics of a pprzlink router between the autopilot and the ground (e.g. pprzlink_router on a Herelink
+        air or ground unit), sent with the aircraft id as sender. Counters are cumulative since the router started.
+        Downlink: AIR receives from the autopilot and sends to the radio, GROUND receives from the radio and sends
+        to the GCS computers (one copy per GCS). Uplink is the reverse. The GROUND report is also the discovery beacon.
+      </description>
+      <field name="node" type="uint8" values="AIR|GROUND">Router that sends this report</field>
+      <field name="uptime" type="uint32" unit="s">Time since the router started</field>
+      <field name="down_rx_msgs" type="uint32">Downlink frames received</field>
+      <field name="down_rx_err" type="uint32">Downlink frames rejected (bad checksum or length)</field>
+      <field name="down_tx_msgs" type="uint32">Downlink frames sent</field>
+      <field name="down_tx_err" type="uint32">Downlink frames that could not be sent</field>
+      <field name="up_rx_msgs" type="uint32">Uplink frames received</field>
+      <field name="up_rx_err" type="uint32">Uplink frames rejected (bad checksum or length)</field>
+      <field name="up_tx_msgs" type="uint32">Uplink frames sent</field>
+      <field name="up_tx_err" type="uint32">Uplink frames that could not be sent</field>
+      <field name="up_dropped" type="uint32">Uplink frames not forwarded because they are for another aircraft</field>
+      <field name="down_max_gap" type="uint16" unit="ms">Longest time without a downlink frame since the previous report</field>
+      <field name="up_max_gap" type="uint16" unit="ms">Longest time without an uplink frame since the previous report</field>
+      <field name="nb_gcs" type="uint8">Number of GCS computers currently known (GROUND only)</field>
+      <field name="rssi" type="int8" unit="dBm">AIR: radio link RSSI, GROUND: Wi-Fi RSSI, 127 if not available</field>
+      <field name="snr" type="int8" unit="dB">Signal to noise ratio of the same link, 127 if not available</field>
+    </message>
 
     <message name="MPPT" id="52">
       <field name="values" type="int16[]" alt_unit_coef="1e-3"/>
@@ -3352,6 +3377,8 @@
       <field name="rx_msgs_rate" type="float" format="%.1f" unit="msgs/s"/>
       <field name="tx_msgs" type="uint32"/>
       <field name="ping_time" type="float" format="%.2f" unit="ms"/>
+      <field name="tx_err" type="uint32">Messages to this aircraft that could not be sent</field>
+      <field name="peer" type="string">Address the uplink to this aircraft is sent to (ip:port), none if not UDP</field>
     </message>
 
     <message name="INTRUDER" id="37">
