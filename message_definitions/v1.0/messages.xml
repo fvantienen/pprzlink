@@ -7,6 +7,9 @@
     <message name="AUTOPILOT_VERSION" id="1">
       <field name="version" type="uint32">version encoded as: MAJOR * 10000 + MINOR * 100 + PATCH</field>
       <field name="desc" type="char[]">version description as string from paparazzi_version</field>
+      <field name="sha1" type="uint8[20]">full git commit hash of the build</field>
+      <field name="build_time" type="uint32" unit="s">build time as UTC unix timestamp, 0 if unknown</field>
+      <field name="mcu_uid" type="uint8[]">unique hardware ID: STM32 UID (12 bytes), Linux board serial or MAC address, PC machine ID in simulation; empty if not available</field>
     </message>
 
     <message name="ALIVE" id="2">
@@ -22,37 +25,7 @@
       <field name="cpu_time" type="uint16" unit="s"></field>
     </message>
 
-    <message name="ARDRONE_NAVDATA" id="5">
-      <field name="taille" type="uint16" />
-      <field name="nu_trame" type="uint16" />
-      <field name="ax" type="uint16" />
-      <field name="ay" type="uint16" />
-      <field name="az" type="uint16" />
-      <field name="vx" type="int16" />
-      <field name="vy" type="int16" />
-      <field name="vz" type="int16" />
-      <field name="temperature_acc" type="uint16" />
-      <field name="temperature_gyro" type="uint16" />
-      <field name="ultrasound" type="uint16" />
-      <field name="us_debut_echo" type="uint16" />
-      <field name="us_fin_echo" type="uint16" />
-      <field name="us_association_echo" type="uint16" />
-      <field name="us_distance_echo" type="uint16" />
-      <field name="us_curve_time" type="uint16" />
-      <field name="us_curve_value" type="uint16" />
-      <field name="us_curve_ref" type="uint16" />
-      <field name="nb_echo" type="uint16" />
-      <field name="sum_echo" type="uint32" />
-      <field name="gradient" type="int16" />
-      <field name="flag_echo_ini" type="uint16" />
-      <field name="pressure" type="int32" />
-      <field name="temperature_pressure" type="uint16" />
-      <field name="mx" type="int16" />
-      <field name="my" type="int16" />
-      <field name="mz" type="int16" />
-      <field name="chksum" type="uint16" />
-      <field name="checksum_errors" type="uint32" />
-    </message>
+    <!-- 5 is free -->
 
     <message name="ATTITUDE" id="6">
       <field name="phi"   type="float" unit="rad" alt_unit="deg"/>
@@ -60,7 +33,7 @@
       <field name="theta" type="float" unit="rad" alt_unit="deg"/>
     </message>
 
-    <!-- 7 is free-->
+    <!-- 7 is free -->
 
     <message name="GPS" id="8">
       <field name="mode"       type="uint8"  unit="byte_mask"/>
@@ -469,7 +442,7 @@
       <field name="scaled" type="float"/>
     </message>
 
-    <!-- 57 is free-->
+    <!-- 57 is free -->
 
     <message name="VISION_OUTBACK" id="58">
       <field name="status" type="uint8"/>
@@ -1128,6 +1101,7 @@
       <field name="array_temp" type="float" unit="deg_celsius" format="%.2f">Imager sensor temperature, NaN if not measured</field>
     </message>
 
+    <!-- Do we need this? -->
     <message name="TIMESTAMP" id="129">
       <field name="timestamp" type="uint32"/>
     </message>
@@ -1456,7 +1430,7 @@
       <field name="pdop"    type="uint16"/>
       <field name="numsv"   type="uint8"/>
       <field name="fix"     type="uint8" values="NONE|NA|2D|3D|DGPS|RTK"/>
-      <field name="comp_id" type="uint8" values="NONE|UBX|NMEA|SIRF|SKYTRAQ|MTK|PIKSI|XSENS|DATALINK|UDP|ARDRONE2|SIM|MULTI|VECTORNAV|IMCU"/>
+      <field name="comp_id" type="uint8" values="NONE|UBX|NMEA|SIRF|SKYTRAQ|MTK|PIKSI|XSENS|DATALINK|UDP|UNUSED|SIM|MULTI|VECTORNAV|IMCU"/>
     </message>
 
     <message name="AHRS_EULER_INT" id="156">
@@ -1904,7 +1878,20 @@
       <field name="mz"    type="float" />
     </message>
 
-    <!-- 194 is free -->
+    <message name="NB_CTRL" id="194">
+      <description>One loop nB controller: thrust direction reference (inertial and body frame) and its derivatives</description>
+      <field name="nI_des"  type="float[]">Desired thrust direction in inertial frame (from sticks or guidance)</field>
+      <field name="nI"      type="float[]">Thrust direction reference in inertial frame after the reference model</field>
+      <field name="nI_d"    type="float[]">1st derivative of the inertial reference</field>
+      <field name="nI_2d"   type="float[]">2nd derivative of the inertial reference</field>
+      <field name="nI_3d"   type="float[]">3rd derivative of the inertial reference</field>
+      <field name="nB"      type="float[]">Thrust direction reference in body frame</field>
+      <field name="nB_d"    type="float[]">1st derivative of the body reference</field>
+      <field name="nB_2d"   type="float[]">2nd derivative of the body reference</field>
+      <field name="nB_3d"   type="float[]">3rd derivative of the body reference</field>
+      <field name="mu_B"    type="float[]">Principal thrust axis in body frame</field>
+    </message>
+
     <!-- 195 is free -->
 
     <message name="AIRSPEED_WIND_ESTIMATOR_EKF" id="196">
@@ -2052,7 +2039,32 @@
       <field name="commands" type="int32[]">Commands send to actuators</field>
     </message>
 
-    <!-- 212 is free -->
+    <message name="DRAW" id="212">
+      <description>
+        The DRAW message is sent to the ground server to be resent as a SHAPE message.
+
+        Id, shape, status, radois, latarr, lonarr and text are retransmitted as is.
+        Color is reinterpreted as follows: aa lll fff
+        - aa: Two top bits for fill opacity, with 0 = Transparent, 1 = Light, 2 = Medium and 3 = Opaque
+        - lll, fff: An index to the colormap, with the following mapping:
+          - 0 : "black"
+          - 1 : "red"
+          - 2 : "green"
+          - 3 : "yellow"
+          - 4 : "blue"
+          - 5 : "magenta"
+          - 6 : "cyan"
+          - 7 : "white"
+      </description>
+      <field name="id" type="uint8"/>
+      <field name="color"  type="uint8">2 bits for opacity, 3 bits for line color, 3 bits for fill color</field>
+      <field name="shape"  type="uint8" values="Circle|Polygon|Line"/>
+      <field name="status" type="uint8"  values="create|delete"/>
+      <field name="radius" type="float" unit="m"/>
+      <field name="latarr" type="int32[]"  unit="1e7deg" alt_unit="deg" alt_unit_coef="0.0000001"/>
+      <field name="lonarr" type="int32[]"  unit="1e7deg" alt_unit="deg" alt_unit_coef="0.0000001"/>
+      <field name="text"   type="char[]"/>
+    </message>
 
     <message name="TUNE_VERT" id="213">
       <field name="z_sp"      type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
@@ -2164,6 +2176,7 @@
       <field name="front_divergence" type="float"> divergence from front cam </field>
     </message>
 
+    <!-- Do we need this? -->
     <message name="VIDEO_SYNC" id="225">
       <field name="id" type="uint8"/>
     </message>
@@ -2182,10 +2195,10 @@
       <field name="fps"         type="float"/>
       <field name="corner_cnt"  type="uint16"/>
       <field name="tracked_cnt" type="uint16"/>
-      <field name="flow_x"      type="int16" unit="subpixels"/>
-      <field name="flow_y"      type="int16" unit="subpixels"/>
-      <field name="flow_der_x"  type="int16" unit="subpixels"/>
-      <field name="flow_der_y"  type="int16" unit="subpixels"/>
+      <field name="flow_x"      type="int32" unit="subpixels"/>
+      <field name="flow_y"      type="int32" unit="subpixels"/>
+      <field name="flow_der_x"  type="int32" unit="subpixels"/>
+      <field name="flow_der_y"  type="int32" unit="subpixels"/>
       <field name="vel_x"       type="float" unit="m/s"/>
       <field name="vel_y"       type="float" unit="m/s"/>
       <field name="vel_z"       type="float" unit="m/s"/>
@@ -3438,6 +3451,15 @@
       <field name="button2" type="uint8" unit="bool">button 2 status</field>
       <field name="button3" type="uint8" unit="bool">button 3 status</field>
       <field name="button4" type="uint8" unit="bool">button 4 status</field>
+    </message>
+
+    <message name="AIRCRAFT_REBOOT" id="42">
+      <description>
+        Sent by the server when an aircraft rebooted with the same build, or started a new log file.
+        A GCS should reset the state it keeps for this aircraft, such as the pre-flight checklist.
+      </description>
+      <field name="ac_id" type="string"/>
+      <field name="reason" type="string" values="CPU_TIME|DATALINK_COUNTERS|NEW_LOG_FILE">How it was detected</field>
     </message>
 
     <message name="PLUMES" id="100">
